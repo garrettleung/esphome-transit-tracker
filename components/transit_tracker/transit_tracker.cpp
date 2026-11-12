@@ -225,7 +225,7 @@ void TransitTracker::send_subscribe_() {
       data["feedCode"] = this->feed_code_;
     }
     data["routeStopPairs"] = this->schedule_string_;
-    data["limit"] = this->25;
+    data["limit"] = this->limit_;
     data["sortByDeparture"] = this->display_departure_times_;
     data["listMode"] = this->list_mode_;
   });
@@ -488,12 +488,6 @@ void TransitTracker::draw_trip(
       // scroll_offset = 0; do nothing
     }
   }
-  Color icon_color = dim_color(
-    is_segment_lit(segment_number)
-        ? this->realtime_color_
-        : this->realtime_color_dark_,
-    this->dimness_
-  );
   this->display_->print(
     0, y_offset, this->font_,
     dim_color(trip.route_color, this->dimness_),
@@ -504,7 +498,7 @@ void TransitTracker::draw_trip(
     this->display_->get_width() + 1,
     y_offset,
     this->font_,
-    time_color,
+    dim_color(Color::WHITE, this->dimness_),
     display::TextAlign::TOP_RIGHT,
     time_display.c_str()
   );
