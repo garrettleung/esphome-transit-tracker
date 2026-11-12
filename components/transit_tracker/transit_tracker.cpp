@@ -218,7 +218,7 @@ void TransitTracker::send_subscribe_() {
       data["feedCode"] = this->feed_code_;
     }
     data["routeStopPairs"] = this->schedule_string_;
-    data["limit"] = this->limit_;
+    data["limit"] = this->25;
     data["sortByDeparture"] = this->display_departure_times_;
     data["listMode"] = this->list_mode_;
   });
