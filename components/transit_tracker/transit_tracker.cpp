@@ -22,6 +22,15 @@ static constexpr int CONNECT_FAILURE_ERROR_THRESHOLD = 3;
 static constexpr int CONNECT_FAILURE_REBOOT_THRESHOLD = 15;
 static constexpr unsigned long HEARTBEAT_TIMEOUT_MS = 60000;
 static constexpr int STALE_TRIP_SECONDS = 60;
+uint8_t dimness_{80};
+
+Color TransitTracker::apply_dimness_(const Color &color) const {
+  return Color(
+    color.r * this->dimness_ / 100,
+    color.g * this->dimness_ / 100,
+    color.b * this->dimness_ / 100
+  );
+}
 
 static std::string compute_device_id() {
   uint8_t mac[6];
@@ -502,17 +511,17 @@ void HOT TransitTracker::draw_schedule() {
   }
 
   if (!esphome::network::is_connected()) {
-    this->draw_text_centered_("Waiting for network", Color(0x252627));
+    this->draw_text_centered_("Waiting for network", COLOR_ON);
     return;
   }
 
   if (!this->rtc_->now().is_valid()) {
-    this->draw_text_centered_("Waiting for time sync", Color(0x252627));
+    this->draw_text_centered_("Waiting for time sync", COLOR_ON);
     return;
   }
 
   if (this->base_url_.empty()) {
-    this->draw_text_centered_("No base URL set", Color(0x252627));
+    this->draw_text_centered_("No base URL set", COLOR_ON);
     return;
   }
 
@@ -522,7 +531,7 @@ void HOT TransitTracker::draw_schedule() {
   }
 
   if (!this->has_ever_connected_.load()) {
-    this->draw_text_centered_("Loading...", Color(0x252627));
+    this->draw_text_centered_("Loading...", COLOR_ON);
     return;
   }
 
@@ -554,7 +563,7 @@ void HOT TransitTracker::draw_schedule() {
       static_cast<int>(filtered_trips.size()), this->limit_);
 
   if (display_count == 0) {
-    this->draw_text_centered_("No matching arrivals", Color(0x252627));
+    this->draw_text_centered_("No matching arrivals", COLOR_ON);
     return;
   }
 
