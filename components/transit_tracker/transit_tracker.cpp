@@ -22,13 +22,11 @@ static constexpr int CONNECT_FAILURE_ERROR_THRESHOLD = 3;
 static constexpr int CONNECT_FAILURE_REBOOT_THRESHOLD = 15;
 static constexpr unsigned long HEARTBEAT_TIMEOUT_MS = 60000;
 static constexpr int STALE_TRIP_SECONDS = 60;
-uint8_t dimness_{80};
-
-Color TransitTracker::apply_dimness_(const Color &color) const {
+static Color dim_color(const Color &color, float dimness) {
   return Color(
-    color.r * this->dimness_ / 100,
-    color.g * this->dimness_ / 100,
-    color.b * this->dimness_ / 100
+    color.r * dimness,
+    color.g * dimness,
+    color.b * dimness
   );
 }
 
@@ -422,9 +420,6 @@ void TransitTracker::draw_trip(
     const Trip &trip, int y_offset, int font_height, unsigned long uptime, uint rtc_now,
     bool no_draw, int *headsign_overflow_out, int scroll_cycle_duration
 ) {
-  if (!no_draw) {
-    this->display_->print(0, y_offset, this->font_, trip.route_color, display::TextAlign::TOP_LEFT, trip.route_name.c_str());
-  }
 
   int route_width, _;
   this->font_->measure(trip.route_name.c_str(), &route_width, &_, &_, &_);
@@ -439,11 +434,6 @@ void TransitTracker::draw_trip(
 
   int headsign_clipping_start = route_width + 3;
   int headsign_clipping_end = this->display_->get_width() - time_width - 2;
-
-  if (!no_draw) {
-    Color time_color = trip.is_realtime ? this->realtime_color_ : Color(0xa7a7a7);
-    this->display_->print(this->display_->get_width() + 1, y_offset, this->font_, time_color, display::TextAlign::TOP_RIGHT, time_display.c_str());
-  }
 
   if (trip.is_realtime) {
     headsign_clipping_end -= 8;
@@ -498,9 +488,34 @@ void TransitTracker::draw_trip(
       // scroll_offset = 0; do nothing
     }
   }
-
+  Color icon_color = dim_color(
+    is_segment_lit(segment_number)
+        ? this->realtime_color_
+        : this->realtime_color_dark_,
+    this->dimness_
+  );
+  this->display_->print(
+    0, y_offset, this->font_,
+    dim_color(trip.route_color, this->dimness_),
+    display::TextAlign::TOP_LEFT,
+    trip.route_name.c_str()
+  );
+  this->display_->print(
+    this->display_->get_width() + 1,
+    y_offset,
+    this->font_,
+    time_color,
+    display::TextAlign::TOP_RIGHT,
+    time_display.c_str()
+  );
   this->display_->start_clipping(headsign_clipping_start, 0, headsign_clipping_end, this->display_->get_height());
-  this->display_->print(headsign_clipping_start - scroll_offset, y_offset, this->font_, trip.headsign.c_str());
+  this->display_->print(
+    headsign_clipping_start - scroll_offset,
+    y_offset,
+    this->font_,
+    dim_color(Color::WHITE, this->dimness_),
+    trip.headsign.c_str()
+  );
   this->display_->end_clipping();
 }
 
@@ -511,17 +526,17 @@ void HOT TransitTracker::draw_schedule() {
   }
 
   if (!esphome::network::is_connected()) {
-    this->draw_text_centered_("Waiting for network", COLOR_ON);
+    this->draw_text_centered_("Waiting for network", Color(0x252627));
     return;
   }
 
   if (!this->rtc_->now().is_valid()) {
-    this->draw_text_centered_("Waiting for time sync", COLOR_ON);
+    this->draw_text_centered_("Waiting for time sync", Color(0x252627));
     return;
   }
 
   if (this->base_url_.empty()) {
-    this->draw_text_centered_("No base URL set", COLOR_ON);
+    this->draw_text_centered_("No base URL set", Color(0x252627));
     return;
   }
 
@@ -531,7 +546,7 @@ void HOT TransitTracker::draw_schedule() {
   }
 
   if (!this->has_ever_connected_.load()) {
-    this->draw_text_centered_("Loading...", COLOR_ON);
+    this->draw_text_centered_("Loading...", Color(0x252627));
     return;
   }
 
@@ -563,7 +578,7 @@ void HOT TransitTracker::draw_schedule() {
       static_cast<int>(filtered_trips.size()), this->limit_);
 
   if (display_count == 0) {
-    this->draw_text_centered_("No matching arrivals", COLOR_ON);
+    this->draw_text_centered_("No matching arrivals", Color(0x252627));
     return;
   }
 
