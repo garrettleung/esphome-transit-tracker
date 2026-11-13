@@ -56,8 +56,8 @@ class TransitTracker : public Component {
     void add_abbreviation(const std::string &from, const std::string &to) { abbreviations_[from] = to; }
     void add_header(const std::string &name, const std::string &value) { extra_headers_.emplace_back(name, value); }
     void set_default_route_color(const Color &color) { default_route_color_ = color; }
-    void set_dimness(uint8_t dimness) {
-      this->dimness_ = dimness / 100.0f;
+    void set_dimness(float dimness) {
+      this->dimness_ = std::clamp(dimness, 0.0f, 1.0f);
     }
     void add_route_style(const std::string &route_id, const std::string &name, const Color &color) { route_styles_[route_id] = RouteStyle{name, color}; }
 
