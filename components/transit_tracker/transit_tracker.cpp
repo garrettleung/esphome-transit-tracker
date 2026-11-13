@@ -27,9 +27,9 @@ static constexpr int STALE_TRIP_SECONDS = 60;
 static Color dim_color(const Color &color, float dimness) {
   dimness = std::clamp(dimness, 0.0f, 1.0f);
   return Color(
-    static_cast<uint8_t>(color.r * .02),
-    static_cast<uint8_t>(color.g * .02),
-    static_cast<uint8_t>(color.b * .02)
+    static_cast<uint8_t>(color.r * dimness),
+    static_cast<uint8_t>(color.g * dimness),
+    static_cast<uint8_t>(color.b * dimness)
   );
 }
 
@@ -413,8 +413,15 @@ void HOT TransitTracker::draw_realtime_icon_(int bottom_right_x, int bottom_righ
         continue;
       }
 
-      Color icon_color = is_segment_lit(segment_number) ? this->realtime_color_ : this->realtime_color_dark_;
-      this->display_->draw_pixel_at(bottom_right_x - (5 - j), bottom_right_y - (5 - i), icon_color);
+    Color icon_color = is_segment_lit(segment_number)
+      ? dim_color(this->realtime_color_, this->dimness_)
+      : dim_color(this->realtime_color_dark_, this->dimness_);
+
+    this->display_->draw_pixel_at(
+        bottom_right_x - (5 - j),
+        bottom_right_y - (5 - i),
+        icon_color
+    );
     }
   }
 }
