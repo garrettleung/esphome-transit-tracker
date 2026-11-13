@@ -559,7 +559,7 @@ void HOT TransitTracker::draw_schedule() {
   uint rtc_now = this->rtc_->now().timestamp;
 
   // Filter out trips arriving/departing in less than 8 minutes
-  const int MIN_ARRIVAL_MINUTES = 8;
+  const int MIN_ARRIVAL_MINUTES = 10;
 
   std::vector<const Trip *> filtered_trips;
 
