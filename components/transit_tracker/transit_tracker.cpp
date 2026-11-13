@@ -595,10 +595,16 @@ void HOT TransitTracker::draw_schedule() {
     }
   }
 
-  int max_trips_height =
-      (display_count * this->font_->get_ascender()) +
-      ((display_count - 1) * this->font_->get_descender());
-  int y_offset = (this->display_->get_height() % max_trips_height) / 2;
+  int max_trips_height = display_count * nominal_font_height;
+
+  int top_padding = 2;
+  int available_height = this->display_->get_height();
+
+  int y_offset = top_padding;
+
+  if (max_trips_height < available_height - top_padding) {
+      y_offset = std::min(top_padding, (available_height - max_trips_height) / 2);
+  }
 
   bool has_header_text = !this->header_text_.empty();
   if (has_header_text) {
