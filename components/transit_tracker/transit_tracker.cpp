@@ -3,6 +3,8 @@
 
 #include <cstdlib>
 #include <strings.h>
+#include <algorithm>
+#include <cstdint>
 
 #include "esp_heap_caps.h"
 #include "esp_idf_version.h"
@@ -23,10 +25,11 @@ static constexpr int CONNECT_FAILURE_REBOOT_THRESHOLD = 15;
 static constexpr unsigned long HEARTBEAT_TIMEOUT_MS = 60000;
 static constexpr int STALE_TRIP_SECONDS = 60;
 static Color dim_color(const Color &color, float dimness) {
+  dimness = std::clamp(dimness, 0.0f, 1.0f);
   return Color(
-    color.r * dimness,
-    color.g * dimness,
-    color.b * dimness
+    static_cast<uint8_t>(color.r * dimness),
+    static_cast<uint8_t>(color.g * dimness),
+    static_cast<uint8_t>(color.b * dimness)
   );
 }
 
@@ -520,17 +523,17 @@ void HOT TransitTracker::draw_schedule() {
   }
 
   if (!esphome::network::is_connected()) {
-    this->draw_text_centered_("Waiting for network", dim_color(Color(0x252627), this->dimness_));
+    this->draw_text_centered_("Waiting for network", dim_color(COLOR_ON, this->dimness_));
     return;
   }
 
   if (!this->rtc_->now().is_valid()) {
-    this->draw_text_centered_("Waiting for time sync", dim_color(Color(0x252627), this->dimness_));
+    this->draw_text_centered_("Waiting for time sync", dim_color(COLOR_ON, this->dimness_));
     return;
   }
 
   if (this->base_url_.empty()) {
-    this->draw_text_centered_("No base URL set", dim_color(Color(0x252627), this->dimness_));
+    this->draw_text_centered_("No base URL set", dim_color(COLOR_ON, this->dimness_));
     return;
   }
 
@@ -540,7 +543,7 @@ void HOT TransitTracker::draw_schedule() {
   }
 
   if (!this->has_ever_connected_.load()) {
-    this->draw_text_centered_("Loading...", dim_color(Color(0x252627), this->dimness_));
+    this->draw_text_centered_("Loading...", dim_color(COLOR_ON, this->dimness_));
     return;
   }
 
@@ -572,7 +575,7 @@ void HOT TransitTracker::draw_schedule() {
       static_cast<int>(filtered_trips.size()), this->limit_);
 
   if (display_count == 0) {
-    this->draw_text_centered_("No matching arrivals", dim_color(Color(0x252627), this->dimness_));
+    this->draw_text_centered_("No matching arrivals", dim_color(COLOR_ON, this->dimness_));
     return;
   }
 
