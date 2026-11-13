@@ -27,9 +27,9 @@ static constexpr int STALE_TRIP_SECONDS = 60;
 static Color dim_color(const Color &color, float dimness) {
   dimness = std::clamp(dimness, 0.0f, 1.0f);
   return Color(
-    static_cast<uint8_t>(color.r * dimness),
-    static_cast<uint8_t>(color.g * dimness),
-    static_cast<uint8_t>(color.b * dimness)
+    static_cast<uint8_t>(color.r * .02),
+    static_cast<uint8_t>(color.g * .02),
+    static_cast<uint8_t>(color.b * .02)
   );
 }
 
