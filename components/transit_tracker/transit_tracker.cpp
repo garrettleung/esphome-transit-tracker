@@ -520,17 +520,17 @@ void HOT TransitTracker::draw_schedule() {
   }
 
   if (!esphome::network::is_connected()) {
-    this->draw_text_centered_("Waiting for network",  dim_color(Color(0x252627)), this->dimness_);
+    this->draw_text_centered_("Waiting for network", dim_color(Color(0x252627), this->dimness_));
     return;
   }
 
   if (!this->rtc_->now().is_valid()) {
-    this->draw_text_centered_("Waiting for time sync",  dim_color(Color(0x252627)), this->dimness_);
+    this->draw_text_centered_("Waiting for time sync", dim_color(Color(0x252627), this->dimness_));
     return;
   }
 
   if (this->base_url_.empty()) {
-    this->draw_text_centered_("No base URL set",  dim_color(Color(0x252627)), this->dimness_);
+    this->draw_text_centered_("No base URL set", dim_color(Color(0x252627), this->dimness_));
     return;
   }
 
@@ -540,7 +540,7 @@ void HOT TransitTracker::draw_schedule() {
   }
 
   if (!this->has_ever_connected_.load()) {
-    this->draw_text_centered_("Loading...",  dim_color(Color(0x252627)), this->dimness_);
+    this->draw_text_centered_("Loading...", dim_color(Color(0x252627), this->dimness_));
     return;
   }
 
@@ -572,7 +572,7 @@ void HOT TransitTracker::draw_schedule() {
       static_cast<int>(filtered_trips.size()), this->limit_);
 
   if (display_count == 0) {
-    this->draw_text_centered_("No matching arrivals",  dim_color(Color(0x252627)), this->dimness_);
+    this->draw_text_centered_("No matching arrivals", dim_color(Color(0x252627), this->dimness_));
     return;
   }
 
